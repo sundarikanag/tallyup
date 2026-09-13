@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>TallyUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #150509;
+    --bg-raised: #210a14;
+    --maroon: #6B0F32;
+    --maroon-deep: #4A0A23;
+    --orange: #D9531E;
+    --orange-bright: #F2762F;
+    --cream: #F6EEE4;
+    --muted: #B48E9C;
+    --line: #3A1522;
+    --green: #5FAE7C;
+    --red: #C24444;
+    --radius: 4px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .num{ font-family:'Oswald', sans-serif; }
+
+  #app{ max-width: 480px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; }
+  .hidden{ display:none !important; }
+
+  .join-wrap{ flex:1; display:flex; flex-direction:column; justify-content:center; padding: 32px 24px; }
+  .brand-mark{
+    font-family:'Oswald', sans-serif; font-weight:700; letter-spacing: 0.5px;
+    font-size: 34px; color: var(--cream); line-height: 1.05; margin: 0 0 6px;
+  }
+  .brand-mark span{ color: var(--orange-bright); }
+  .brand-sub{ color: var(--muted); font-size: 14.5px; margin: 0 0 32px; line-height:1.5; max-width: 34ch; }
+  label{ display:block; font-size: 12.5px; color: var(--muted); margin: 18px 0 6px; }
+  input[type=text]{
+    width:100%; background: var(--bg-raised); border: 1px solid var(--line);
+    color: var(--cream); font-size: 16px; padding: 13px 14px; border-radius: var(--radius);
+    font-family:'Inter',sans-serif;
+  }
+  input[type=text]:focus{ outline: none; border-color: var(--orange); }
+  .btn{
+    border:none; border-radius: var(--radius); font-family:'Inter',sans-serif; font-weight:600;
+    cursor:pointer; -webkit-user-select:none; user-select:none;
+  }
+  .btn-primary{
+    background: var(--orange); color: #1A0806; font-size: 15.5px; padding: 14px 18px;
+    width:100%; margin-top: 24px;
+  }
+  .btn-primary:active{ background: var(--orange-bright); }
+  .btn-primary:disabled{ opacity: .6; }
+  .recent-row{ margin-top: 18px; display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{
+    background: transparent; border: 1px solid var(--line); color: var(--muted);
+    font-size: 13px; padding: 7px 12px; border-radius: 20px; cursor:pointer;
+  }
+  .join-error{ color: var(--red); font-size: 13px; margin-top: 10px; min-height: 16px; }
+
+  header{
+    position: sticky; top:0; z-index: 5;
+    background: var(--maroon-deep); border-bottom: 1px solid var(--line);
+    padding: 14px 16px 12px;
+  }
+  .hdr-row1{ display:flex; align-items:baseline; justify-content:space-between; }
+  .hdr-event{ font-family:'Oswald',sans-serif; font-weight:600; font-size:17px; letter-spacing:.3px; }
+  .hdr-who{ font-size: 12px; color: var(--muted); background:none; border:none; padding:0; cursor:pointer; text-decoration: underline; text-decoration-color: var(--line); }
+  .phase-tabs{ display:flex; gap:6px; margin-top: 12px; }
+  .phase-tab{
+    flex:1; text-align:center; padding: 9px 4px; border-radius: var(--radius);
+    background: var(--bg-raised); color: var(--muted); font-size: 13px; font-weight:600;
+    border: 1px solid var(--line); cursor:pointer;
+  }
+  .phase-tab.active{ background: var(--orange); color:#1A0806; border-color: var(--orange); }
+
+  main{ flex:1; padding: 14px 14px 100px; }
+  .sync-note{ font-size: 11.5px; color: var(--muted); text-align:center; margin: 2px 0 14px; }
+  .item-card{
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius);
+    margin-bottom: 10px; overflow:hidden;
+  }
+  .item-head{ padding: 13px 14px; cursor:pointer; }
+  .item-title-row{ display:flex; justify-content:space-between; align-items:flex-start; gap: 10px; }
+  .item-name{ font-size: 15px; font-weight:600; line-height:1.3; }
+  .item-sub{ font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .item-chevron{ color: var(--muted); font-size: 13px; transition: transform .15s; margin-top:2px; }
+  .item-card.open .item-chevron{ transform: rotate(90deg); }
+  .metrics{ display:flex; gap: 18px; margin-top: 10px; }
+  .metric-label{ font-size: 10.5px; color: var(--muted); letter-spacing: .3px; }
+  .metric-val{ font-family:'Oswald',sans-serif; font-size: 22px; font-weight:600; line-height:1.1; }
+  .metric-val.dim{ color: var(--muted); }
+  .metric-val.sold{ color: var(--green); }
+
+  .item-body{ max-height:0; overflow:hidden; transition: max-height .2s ease; }
+  .item-card.open .item-body{ max-height: 600px; }
+  .item-body-in{ padding: 4px 14px 16px; border-top: 1px solid var(--line); }
+
+  .entries{ margin: 10px 0 2px; }
+  .entry-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 7px 0; font-size: 13px; border-bottom: 1px dashed var(--line);
+  }
+  .entry-row:last-child{ border-bottom:none; }
+  .entry-who{ color: var(--cream); }
+  .entry-when{ color: var(--muted); font-size: 11px; margin-left: 6px; }
+  .entry-amt{ font-family:'Oswald',sans-serif; font-weight:600; font-size:15px; }
+  .entry-del{ background:none; border:none; color: var(--muted); font-size: 16px; cursor:pointer; padding: 2px 6px; }
+  .no-entries{ color: var(--muted); font-size: 12.5px; padding: 8px 0; }
+
+  .quickadd-label{ font-size: 11px; color: var(--muted); margin: 12px 0 6px; }
+  .chip-row{ display:flex; gap:7px; flex-wrap:wrap; }
+  .qty-chip{
+    background: var(--bg); border: 1px solid var(--line); color: var(--cream);
+    font-family:'Oswald',sans-serif; font-size: 14px; padding: 8px 4px; border-radius: var(--radius);
+    min-width: 44px; text-align:center; cursor:pointer;
+  }
+  .qty-chip:active{ background: var(--maroon); }
+  .custom-row{ display:flex; gap:8px; margin-top: 10px; }
+  .custom-row input{ flex:1; }
+  .add-btn{ background: var(--orange); color:#1A0806; padding: 0 16px; font-size:14px; border-radius: var(--radius); }
+
+  .fab{
+    position: fixed; left:50%; transform: translateX(-50%); bottom: 18px; z-index: 6;
+    width: calc(100% - 28px); max-width: 452px;
+  }
+  .fab-btn{
+    width:100%; background: var(--maroon); border: 1px solid var(--orange); color: var(--cream);
+    padding: 13px; border-radius: var(--radius); font-size: 14px; font-weight:600;
+  }
+
+  .sheet-backdrop{
+    position: fixed; inset:0; background: rgba(10,2,5,0.72); z-index: 10;
+    display:flex; align-items:flex-end;
+  }
+  .sheet{
+    background: var(--bg-raised); width:100%; max-width: 480px; margin: 0 auto;
+    border-top: 1px solid var(--line); border-radius: 10px 10px 0 0; padding: 20px 18px 26px;
+  }
+  .sheet-title{ font-family:'Oswald',sans-serif; font-size: 17px; font-weight:600; margin-bottom: 4px; }
+  .sheet-sub{ color: var(--muted); font-size: 12.5px; margin-bottom: 4px; }
+  .sheet-actions{ display:flex; gap:10px; margin-top: 18px; }
+  .sheet-actions .btn{ flex:1; padding: 12px; font-size: 14px; }
+  .btn-ghost{ background: transparent; border: 1px solid var(--line); color: var(--muted); }
+
+  .conn-banner{
+    background: var(--red); color: var(--cream); font-size: 12.5px; text-align:center;
+    padding: 8px; display:none;
+  }
+  .conn-banner.show{ display:block; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="conn-banner" id="connBanner">Can't reach the database right now — check your connection.</div>
+
+  <!-- ===================== JOIN SCREEN ===================== -->
+  <div class="join-wrap" id="joinScreen">
+    <div class="brand-mark">Tally<span>Up</span></div>
+    <p class="brand-sub">One running count, everybody's cooler. Enter your crew's event code to join the shared tally.</p>
+
+    <label for="eventCodeInput">Event code (share this with your crew)</label>
+    <input type="text" id="eventCodeInput" placeholder="e.g. HOKIEVILLAGE-0912" autocomplete="off">
+
+    <label for="nameInput">Your name</label>
+    <input type="text" id="nameInput" placeholder="e.g. Sundari" autocomplete="off">
+
+    <div class="recent-row" id="recentRow"></div>
+    <div class="join-error" id="joinError"></div>
+    <button class="btn btn-primary" id="joinBtn">Join session</button>
+  </div>
+
+  <!-- ===================== MAIN SCREEN ===================== -->
+  <div class="hidden" id="mainScreen">
+    <header>
+      <div class="hdr-row1">
+        <div class="hdr-event" id="hdrEvent">—</div>
+        <button class="hdr-who" id="switchUserBtn">not you?</button>
+      </div>
+      <div class="phase-tabs">
+        <div class="phase-tab" data-phase="in">Count In</div>
+        <div class="phase-tab" data-phase="out">Count Out</div>
+        <div class="phase-tab" data-phase="waste">Waste / Comp</div>
+      </div>
+    </header>
+    <main>
+      <div class="sync-note" id="syncNote">syncing with your crew…</div>
+      <div id="itemList"></div>
+    </main>
+    <div class="fab">
+      <button class="fab-btn" id="addItemBtn">+ Add item not on the list</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // ---------------- Firebase Realtime Database (REST, no SDK needed) ----------------
+  var FIREBASE_URL = 'https://tallyup-2a027-default-rtdb.firebaseio.com';
+
+  async function fbGet(path){
+    var res = await fetch(FIREBASE_URL + path + '.json');
+    if (!res.ok) throw new Error('GET failed: ' + res.status);
+    return res.json();
+  }
+  async function fbPut(path, data){
+    var res = await fetch(FIREBASE_URL + path + '.json', {
+      method: 'PUT', body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('PUT failed: ' + res.status);
+    return res.json();
+  }
+  async function fbPost(path, data){
+    var res = await fetch(FIREBASE_URL + path + '.json', {
+      method: 'POST', body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('POST failed: ' + res.status);
+    return res.json(); // { name: "-Nxyz..." }
+  }
+  async function fbDelete(path){
+    var res = await fetch(FIREBASE_URL + path + '.json', { method: 'DELETE' });
+    if (!res.ok) throw new Error('DELETE failed: ' + res.status);
+    return res.json();
+  }
+
+  function showConnError(show){
+    document.getElementById('connBanner').classList.toggle('show', !!show);
+  }
+
+  // ---------------- state ----------------
+  var state = {
+    eventCode: null,
+    name: null,
+    phase: 'in',
+    catalog: [],
+    tallies: [],       // [{key, itemId, phase, name, amount, ts}]
+    openItemId: null,
+    pollHandle: null
+  };
+
+  var DEFAULT_CATALOG = [
+    { id:'coors_light',    name:'Beer — Coors Light',            sub:'each · CS/24' },
+    { id:'highnoon_pine',  name:'High Noon Pineapple',           sub:'each · CS/24' },
+    { id:'michelob_ultra', name:'Beer — Michelob Ultra',         sub:'each · CS/24' },
+    { id:'dasani_20oz',    name:'Water — Dasani 20oz',           sub:'each · CS/24' },
+    { id:'miller_lite',    name:'Beer — Miller Lite',            sub:'each · CS/24' },
+    { id:'monster_reg',    name:'Monster Energy Regular',        sub:'black + green can' },
+    { id:'monster_zero',   name:'Monster Zero Sugar',            sub:'white can' },
+    { id:'surfside',       name:'Surfside',                      sub:'each' },
+    { id:'boldrock',       name:'Bold Rock',                     sub:'each' }
+  ];
+
+  // ---------------- helpers ----------------
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+  function fmtTime(ts){
+    var d = new Date(ts);
+    var h = d.getHours(), m = d.getMinutes();
+    var ap = h >= 12 ? 'pm' : 'am';
+    h = h % 12; if (h === 0) h = 12;
+    return h + ':' + (m<10?'0':'') + m + ap;
+  }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  // Firebase keys can't contain . $ # [ ] / — strip those, then uppercase + hyphenate
+  function normCode(s){
+    return s.trim().toUpperCase().replace(/\s+/g,'-').replace(/[.$#\[\]\/]/g, '-');
+  }
+
+  // ---------------- local profile (real browser now — localStorage is fine) ----------------
+  function loadProfile(){
+    try { return JSON.parse(localStorage.getItem('standTallyProfile') || 'null'); }
+    catch(e){ return null; }
+  }
+  function saveProfile(p){
+    try { localStorage.setItem('standTallyProfile', JSON.stringify(p)); } catch(e){}
+  }
+
+  // ---------------- join screen ----------------
+  var joinScreen = document.getElementById('joinScreen');
+  var mainScreen = document.getElementById('mainScreen');
+  var eventCodeInput = document.getElementById('eventCodeInput');
+  var nameInput = document.getElementById('nameInput');
+  var joinBtn = document.getElementById('joinBtn');
+  var joinError = document.getElementById('joinError');
+  var recentRow = document.getElementById('recentRow');
+
+  function initJoinScreen(){
+    var p = loadProfile();
+    if (p){
+      if (p.name) nameInput.value = p.name;
+      if (p.lastEventCode){
+        var chip = document.createElement('button');
+        chip.className = 'chip';
+        chip.textContent = 'rejoin ' + p.lastEventCode;
+        chip.onclick = function(){ eventCodeInput.value = p.lastEventCode; };
+        recentRow.appendChild(chip);
+      }
+    }
+  }
+
+  joinBtn.onclick = async function(){
+    var code = normCode(eventCodeInput.value || '');
+    var name = (nameInput.value || '').trim();
+    joinError.textContent = '';
+    if (!code){ joinError.textContent = 'Enter an event code — anything your crew agrees on.'; return; }
+    if (!name){ joinError.textContent = 'Enter your name so your counts are tagged.'; return; }
+
+    joinBtn.textContent = 'Joining…';
+    joinBtn.disabled = true;
+
+    try {
+      saveProfile({ name: name, lastEventCode: code });
+
+      var catalog = await fbGet('/events/' + code + '/catalog');
+      if (catalog && Array.isArray(catalog)){
+        state.catalog = catalog;
+      } else {
+        state.catalog = DEFAULT_CATALOG.slice();
+        await fbPut('/events/' + code + '/catalog', state.catalog);
+      }
+
+      state.eventCode = code;
+      state.name = name;
+
+      joinScreen.classList.add('hidden');
+      mainScreen.classList.remove('hidden');
+      document.getElementById('hdrEvent').textContent = code;
+
+      await refreshTallies();
+      renderItems();
+      startPolling();
+      showConnError(false);
+    } catch(e){
+      joinError.textContent = "Couldn't reach the database — check your connection and try again.";
+      console.error(e);
+    }
+
+    joinBtn.textContent = 'Join session';
+    joinBtn.disabled = false;
+  };
+
+  document.getElementById('switchUserBtn').onclick = function(){
+    stopPolling();
+    mainScreen.classList.add('hidden');
+    joinScreen.classList.remove('hidden');
+  };
+
+  // ---------------- phase tabs ----------------
+  var phaseTabs = document.querySelectorAll('.phase-tab');
+  phaseTabs.forEach(function(tab){
+    tab.onclick = function(){
+      state.phase = tab.getAttribute('data-phase');
+      phaseTabs.forEach(function(t){ t.classList.toggle('active', t === tab); });
+      renderItems();
+    };
+  });
+  phaseTabs[0].classList.add('active');
+
+  function phaseLabel(p){
+    return p === 'in' ? 'Count In' : (p === 'out' ? 'Count Out' : 'Waste / Comp');
+  }
+
+  // ---------------- data sync ----------------
+  async function refreshTallies(){
+    if (!state.eventCode) return;
+    try {
+      var obj = await fbGet('/events/' + state.eventCode + '/tallies');
+      var tallies = [];
+      if (obj){
+        Object.keys(obj).forEach(function(key){
+          var t = obj[key];
+          if (t && typeof t.amount === 'number'){
+            tallies.push({
+              key: key, itemId: t.itemId, phase: t.phase,
+              name: t.name, amount: t.amount, ts: t.ts
+            });
+          }
+        });
+      }
+      tallies.sort(function(a,b){ return a.ts - b.ts; });
+      state.tallies = tallies;
+      showConnError(false);
+    } catch(e){
+      showConnError(true);
+    }
+  }
+
+  function startPolling(){
+    stopPolling();
+    state.pollHandle = setInterval(async function(){
+      await refreshTallies();
+      renderItems();
+    }, 4000);
+  }
+  function stopPolling(){
+    if (state.pollHandle){ clearInterval(state.pollHandle); state.pollHandle = null; }
+  }
+
+  // ---------------- rendering ----------------
+  var itemList = document.getElementById('itemList');
+  var syncNote = document.getElementById('syncNote');
+
+  function totalsFor(itemId){
+    var byPhase = { in:0, out:0, waste:0 };
+    state.tallies.forEach(function(t){
+      if (t.itemId === itemId && byPhase.hasOwnProperty(t.phase)) byPhase[t.phase] += t.amount;
+    });
+    return byPhase;
+  }
+
+  function renderItems(){
+    syncNote.textContent = 'last synced ' + fmtTime(Date.now()) + ' · ' + phaseLabel(state.phase) + ' totals shown';
+    itemList.innerHTML = '';
+    state.catalog.forEach(function(item){
+      var totals = totalsFor(item.id);
+      var sold = totals.in - totals.out - totals.waste;
+      var isOpen = state.openItemId === item.id;
+
+      var card = document.createElement('div');
+      card.className = 'item-card' + (isOpen ? ' open' : '');
+
+      var head = document.createElement('div');
+      head.className = 'item-head';
+      head.innerHTML =
+        '<div class="item-title-row">' +
+          '<div>' +
+            '<div class="item-name">' + esc(item.name) + '</div>' +
+            '<div class="item-sub">' + esc(item.sub || '') + '</div>' +
+          '</div>' +
+          '<div class="item-chevron">›</div>' +
+        '</div>' +
+        '<div class="metrics">' +
+          '<div class="metric"><div class="metric-label">IN</div><div class="metric-val' + (state.phase==='in'?'':' dim') + '">' + totals.in + '</div></div>' +
+          '<div class="metric"><div class="metric-label">OUT</div><div class="metric-val' + (state.phase==='out'?'':' dim') + '">' + totals.out + '</div></div>' +
+          '<div class="metric"><div class="metric-label">SOLD</div><div class="metric-val sold">' + sold + '</div></div>' +
+        '</div>';
+      head.onclick = function(){
+        state.openItemId = isOpen ? null : item.id;
+        renderItems();
+      };
+      card.appendChild(head);
+
+      if (isOpen){
+        var body = document.createElement('div');
+        body.className = 'item-body';
+        var bodyIn = document.createElement('div');
+        bodyIn.className = 'item-body-in';
+
+        var entriesWrap = document.createElement('div');
+        entriesWrap.className = 'entries';
+        var relevant = state.tallies.filter(function(t){ return t.itemId === item.id && t.phase === state.phase; });
+        if (!relevant.length){
+          var none = document.createElement('div');
+          none.className = 'no-entries';
+          none.textContent = 'No ' + phaseLabel(state.phase).toLowerCase() + ' entries yet — be the first.';
+          entriesWrap.appendChild(none);
+        } else {
+          relevant.forEach(function(t){
+            var row = document.createElement('div');
+            row.className = 'entry-row';
+            var mine = t.name === state.name;
+            row.innerHTML =
+              '<div><span class="entry-who">' + esc(t.name) + '</span><span class="entry-when">' + fmtTime(t.ts) + '</span></div>' +
+              '<div style="display:flex;align-items:center;">' +
+                '<span class="entry-amt">+' + t.amount + '</span>' +
+                (mine ? '<button class="entry-del" data-key="' + esc(t.key) + '">×</button>' : '') +
+              '</div>';
+            entriesWrap.appendChild(row);
+          });
+        }
+        bodyIn.appendChild(entriesWrap);
+
+        var qLabel = document.createElement('div');
+        qLabel.className = 'quickadd-label';
+        qLabel.textContent = 'Add your count for ' + phaseLabel(state.phase).toLowerCase();
+        bodyIn.appendChild(qLabel);
+
+        var chipRow = document.createElement('div');
+        chipRow.className = 'chip-row';
+        [1,6,10,12,20,24,30].forEach(function(n){
+          var chip = document.createElement('div');
+          chip.className = 'qty-chip';
+          chip.textContent = '+' + n;
+          chip.onclick = function(){ addTally(item.id, n); };
+          chipRow.appendChild(chip);
+        });
+        bodyIn.appendChild(chipRow);
+
+        var customRow = document.createElement('div');
+        customRow.className = 'custom-row';
+        var customInput = document.createElement('input');
+        customInput.type = 'text';
+        customInput.inputMode = 'numeric';
+        customInput.placeholder = 'custom #';
+        var addBtn = document.createElement('button');
+        addBtn.className = 'btn add-btn';
+        addBtn.textContent = 'Add';
+        addBtn.onclick = function(){
+          var n = parseInt(customInput.value, 10);
+          if (!isNaN(n) && n !== 0){ addTally(item.id, n); customInput.value = ''; }
+        };
+        customRow.appendChild(customInput);
+        customRow.appendChild(addBtn);
+        bodyIn.appendChild(customRow);
+
+        body.appendChild(bodyIn);
+        card.appendChild(body);
+
+        setTimeout(function(){
+          entriesWrap.querySelectorAll('.entry-del').forEach(function(btn){
+            btn.onclick = function(e){
+              e.stopPropagation();
+              deleteTally(btn.getAttribute('data-key'));
+            };
+          });
+        }, 0);
+      }
+
+      itemList.appendChild(card);
+    });
+  }
+
+  async function addTally(itemId, amount){
+    var t = { itemId: itemId, phase: state.phase, name: state.name, amount: amount, ts: Date.now() };
+    try {
+      var res = await fbPost('/events/' + state.eventCode + '/tallies', t);
+      t.key = res.name;
+      state.tallies.push(t);
+      renderItems();
+      showConnError(false);
+    } catch(e){
+      showConnError(true);
+    }
+  }
+
+  async function deleteTally(key){
+    try {
+      await fbDelete('/events/' + state.eventCode + '/tallies/' + key);
+      state.tallies = state.tallies.filter(function(t){ return t.key !== key; });
+      renderItems();
+    } catch(e){
+      showConnError(true);
+    }
+  }
+
+  // ---------------- add item sheet ----------------
+  document.getElementById('addItemBtn').onclick = function(){
+    var backdrop = document.createElement('div');
+    backdrop.className = 'sheet-backdrop';
+    backdrop.innerHTML =
+      '<div class="sheet">' +
+        '<div class="sheet-title">Add an item</div>' +
+        '<div class="sheet-sub">Shows up for the whole crew on this event code.</div>' +
+        '<label>Item name</label>' +
+        '<input type="text" id="newItemName" placeholder="e.g. White Claw Variety">' +
+        '<label>Pack / size (optional)</label>' +
+        '<input type="text" id="newItemSub" placeholder="e.g. each · CS/24">' +
+        '<div class="sheet-actions">' +
+          '<button class="btn btn-ghost" id="cancelAddItem">Cancel</button>' +
+          '<button class="btn btn-primary" id="confirmAddItem" style="margin-top:0;">Add item</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(backdrop);
+    backdrop.onclick = function(e){ if (e.target === backdrop) document.body.removeChild(backdrop); };
+    document.getElementById('cancelAddItem').onclick = function(){ document.body.removeChild(backdrop); };
+    document.getElementById('confirmAddItem').onclick = async function(){
+      var name = (document.getElementById('newItemName').value || '').trim();
+      var sub = (document.getElementById('newItemSub').value || '').trim();
+      if (!name) return;
+      var newItem = { id: 'custom_' + uid(), name: name, sub: sub };
+      state.catalog.push(newItem);
+      try {
+        await fbPut('/events/' + state.eventCode + '/catalog', state.catalog);
+        document.body.removeChild(backdrop);
+        state.openItemId = newItem.id;
+        renderItems();
+      } catch(e){
+        showConnError(true);
+      }
+    };
+  };
+
+  // ---------------- boot ----------------
+  initJoinScreen();
+})();
+</script>
+</body>
+</html>
