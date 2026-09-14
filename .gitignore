@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+
+# In case any tooling or dependencies get added later
+node_modules/
+.env

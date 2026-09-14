@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TallyUp</title>
+
+<!-- fonts: mulish for normal text, space mono for the big numbers/headers, caveat for the handwritten tagline -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Mulish', sans-serif;
+    font-size: 16px;
+    background-image: url('Tally-Up.png'); /* the star background i made in canva */
+    background-repeat: repeat;
+    background-size: 400px;
+    color: #2B0A17;
+    display: flex;
+    justify-content: center; /* centers the card side to side */
+    align-items: center;     /* centers it up and down too */
+    margin: 0;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* all my screens share this same card look so i only had to style it once */
+  .screen {
+    background: #FFFBF3;
+    border: 3px solid #861F41; /* vt maroon */
+    padding: 30px;
+    width: 320px;
+    text-align: center;
+  }
+
+  h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    color: #861F41;
+    margin-top: 0;
+    margin-bottom: 4px;
+  }
+
+  .tagline {
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: #F28C42;
+    margin: 0 0 20px;
+  }
+
+  p { color: #555; }
+
+  label {
+    display: block;
+    text-align: left;
+    font-size: 12.5px;
+    color: #861F41;
+    font-weight: 600;
+    margin: 14px 0 5px;
+  }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #E9D9C8;
+    font-family: 'Mulish', sans-serif;
+    font-size: 14px;
+    box-sizing: border-box; /* keeps the padding from making inputs wider than the card */
+  }
+
+  input:focus { outline: none; border-color: #861F41; }
+
+  /* the cooler a / cooler b buttons side by side */
+  .cooler-row { display: flex; gap: 8px; margin-top: 6px; }
+  .cooler-option {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #E9D9C8;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .cooler-option.selected { border-color: #861F41; background: #F3E3D3; }
+
+  button {
+    background: transparent;
+    border: 2px solid #861F41;
+    color: #861F41;
+    padding: 12px 18px;
+    margin: 8px 0;
+    font-family: 'Mulish', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+  }
+  button:hover { background: #F28C42; color: white; }
+
+  /* dashed box that shows the join code once a count is created */
+  .code-box {
+    font-family: 'Space Mono', monospace;
+    font-size: 30px;
+    letter-spacing: 3px;
+    color: #861F41;
+    border: 2px dashed #861F41;
+    padding: 14px;
+    margin: 14px 0;
+  }
+
+  /* count in / count out toggle */
+  .phase-row { display: flex; gap: 6px; margin: 10px 0 16px; }
+  .phase-tab {
+    flex: 1;
+    padding: 8px;
+    border: 2px solid #E9D9C8;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+  }
+  .phase-tab.active { border-color: #861F41; background: #F3E3D3; }
+
+  /* each product row on the dashboard */
+  .prod-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #E9D9C8;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+  }
+  .prod-status { font-size: 11.5px; color: #999; }
+  .prod-status.done { color: #4C8C5F; }
+
+  /* the huge number showing your current subtotal */
+  .count-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 48px;
+    color: #861F41;
+    margin: 6px 0 2px;
+  }
+  .count-label { font-size: 11px; color: #999; margin-bottom: 16px; }
+
+  /* +1 +6 +10 etc grid of buttons */
+  .chip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .qty-chip {
+    border: 2px solid #E9D9C8;
+    padding: 12px 2px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .qty-chip:hover { border-color: #861F41; background: #F3E3D3; }
+
+  /* the giant repeat button once you've picked a number to count by */
+  .big-repeat {
+    background: #E5751F;
+    color: white;
+    border: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 34px;
+    font-weight: 700;
+    padding: 26px;
+    width: 100%;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .groups-label { font-size: 12px; color: #999; margin: 6px 0; }
+
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 18px 0;
+    padding-top: 14px;
+    border-top: 1px solid #E9D9C8;
+  }
+  .tot-label { font-size: 10px; color: #999; }
+  .tot-val { font-family: 'Space Mono', monospace; font-size: 18px; color: #861F41; }
+  .tot-val.shared { color: #4C8C5F; font-size: 22px; } /* shared total is the important one so its bigger/green */
+
+  .sum-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+  .sum-table th { text-align: right; color: #999; font-weight: 500; padding: 4px; font-size: 10px; }
+  .sum-table th:first-child { text-align: left; }
+  .sum-table td { text-align: right; padding: 5px 4px; border-top: 1px solid #E9D9C8; }
+  .sum-table td:first-child { text-align: left; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- 
+  each of these divs below is basically its own "page" of the app.
+  only one shows at a time - showScreen() just hides all of them
+  then unhides whichever one you asked for. didn't want to deal with
+  actual separate html pages/routing for something this small
+-->
+
+<!-- home page -->
+<div class="screen" id="homeScreen">
+  <h1>Tally-Up</h1>
+  <p class="tagline">count together!</p>
+  <button onclick="showScreen('createScreen')">Create a Count</button>
+  <button onclick="showScreen('joinScreen')">Join a Count</button>
+</div>
+
+<!-- create step 1 - basic info + pick your own cooler -->
+<div class="screen" id="createScreen" style="display:none;">
+  <h1>Create</h1>
+  <label for="eventName">Event name</label>
+  <input type="text" id="eventName" placeholder="e.g. VT vs. Miami">
+  <label for="standName">Stand</label>
+  <input type="text" id="standName" placeholder="e.g. Hokie Village">
+  <label for="yourNameCreate">Your name</label>
+  <input type="text" id="yourNameCreate" placeholder="e.g. Sundari">
+  <label>Where are you counting?</label>
+  <div class="cooler-row">
+    <div class="cooler-option" id="coolerACreate" onclick="pickCooler('A')">Cooler A</div>
+    <div class="cooler-option" id="coolerBCreate" onclick="pickCooler('B')">Cooler B</div>
+  </div>
+  <button onclick="showScreen('productScreen'); renderProducts();">Next</button>
+  <button onclick="showScreen('homeScreen')">Back</button>
+</div>
+
+<!-- create step 2 - which drinks go in which cooler -->
+<div class="screen" id="productScreen" style="display:none;">
+  <h1>Products</h1>
+  <p style="font-size:13px;">uncheck a cooler if that drink isn't there</p>
+  <div id="productList"></div> <!-- renderProducts() fills this in -->
+  <button onclick="finishCreate()">Create Count</button>
+  <button onclick="showScreen('createScreen')">Back</button>
+</div>
+
+<!-- shows up after you actually save the count, has the join code -->
+<div class="screen" id="createdScreen" style="display:none;">
+  <h1>Created!</h1>
+  <p id="createdEventName" style="font-size:13px;"></p>
+  <label>Join code</label>
+  <div class="code-box" id="createdCode"></div>
+  <button onclick="goDashboard()">Start Counting</button>
+</div>
+
+<!-- join step 1 - type in the code -->
+<div class="screen" id="joinScreen" style="display:none;">
+  <h1>Join</h1>
+  <label for="joinCode">Event code</label>
+  <input type="text" id="joinCode" placeholder="e.g. HOKIE7">
+  <label for="yourNameJoin">Your name</label>
+  <input type="text" id="yourNameJoin" placeholder="e.g. Olivia">
+  <button onclick="findSession()">Continue</button>
+  <button onclick="showScreen('homeScreen')">Back</button>
+</div>
+
+<!-- join step 2 - pick a cooler -->
+<div class="screen" id="coolerJoinScreen" style="display:none;">
+  <h1 id="joinEventName"></h1>
+  <p id="joinStandName" style="font-size:13px;"></p>
+  <p style="font-size:13px;">where are you counting?</p>
+  <div class="cooler-row">
+    <div class="cooler-option" onclick="joinCooler('A')">Cooler A</div>
+    <div class="cooler-option" onclick="joinCooler('B')">Cooler B</div>
+  </div>
+  <button onclick="showScreen('joinScreen')">Back</button>
+</div>
+
+<!-- your product checklist, only shows stuff in YOUR cooler -->
+<div class="screen" id="dashboardScreen" style="display:none;">
+  <h1 id="dashEventName"></h1>
+  <p id="dashSub" style="font-size:12px;"></p>
+  <div class="phase-row">
+    <div class="phase-tab" id="phaseInTab" onclick="setPhase('in')">Count In</div>
+    <div class="phase-tab" id="phaseOutTab" onclick="setPhase('out')">Count Out</div>
+  </div>
+  <div id="dashList" style="text-align:left;"></div> <!-- renderDashboard() fills this in -->
+  <button onclick="showScreen('summaryScreen'); renderSummary();">View Summary</button>
+</div>
+
+<!-- the actual tally screen for one product -->
+<div class="screen" id="countingScreen" style="display:none;">
+  <h1 id="countProdName"></h1>
+  <p id="countPhaseLabel" style="font-size:12px;"></p>
+  <div class="count-num" id="countNum">0</div>
+  <div class="count-label">YOUR COUNT</div>
+  <div id="countControls"></div> <!-- either the increment chips or the big repeat button -->
+  <div class="totals-row" id="countTotals"></div>
+  <button id="doneBtn" onclick="toggleDone()"></button>
+  <button onclick="goDashboard()">Back</button>
+</div>
+
+<!-- count in + count out tables at the end -->
+<div class="screen" id="summaryScreen" style="display:none;">
+  <h1 id="sumEventName"></h1>
+  <div id="sumTables"></div>
+  <button onclick="showScreen('dashboardScreen')">Back</button>
+</div>
+
+<script>
+  // talking to firebase using plain fetch instead of installing their sdk
+  // so i don't need npm or a build step, its literally just one html file.
+  // downside is i dont get their built in offline stuff or live listeners,
+  // thats why i wrote my own polling loop below (startPolling) to fake "realtime"
+  const FIREBASE_URL = 'https://tallyup-2a027-default-rtdb.firebaseio.com';
+
+  async function fbGet(path) {
+    let res = await fetch(FIREBASE_URL + path + '.json');
+    return res.json(); // returns null if nothing is saved there yet
+  }
+  async function fbPut(path, data) {
+    await fetch(FIREBASE_URL + path + '.json', { method: 'PUT', body: JSON.stringify(data) });
+  }
+  async function fbDelete(path) {
+    await fetch(FIREBASE_URL + path + '.json', { method: 'DELETE' });
+  }
+
+  // ---------- everything the app currently knows, just sitting in memory ----------
+  // none of this is permanent, firebase is the real copy. this stuff resets
+  // every time you refresh the page
+
+  let draft = { products: {} }; // holds whatever you're typing during Create, before its actually saved
+
+  // starting list of drinks so i don't have to type them in every time i test
+  let defaultProducts = ['Coors Light', 'High Noon Pineapple', 'Michelob Ultra', 'Dasani', 'Miller Lite', 'Monster Energy'];
+  defaultProducts.forEach(function(name) { draft.products[name] = { A: true, B: true }; });
+
+  let joinedSession = null;    // the whole session object, matches whats in firebase
+  let joinedCode = null;       // the 6 letter code for the session we're in
+  let me = null;               // who i am rn - { workerId, name, cooler }
+  let phase = 'in';            // in or out
+  let currentProduct = null;   // whatever product im looking at on the counting screen
+  let currentIncrement = null; // the number im tapping by (10, 20, whatever)
+  let pollHandle = null;       // so i can clear the old timer instead of stacking a bunch of them
+
+  // random 6 char code, skips letters/numbers that look alike (O vs 0, I vs 1)
+  function generateCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  // hides every screen then shows just the one you want
+  function showScreen(id) {
+    ['homeScreen','createScreen','productScreen','createdScreen','joinScreen','coolerJoinScreen','dashboardScreen','countingScreen','summaryScreen']
+      .forEach(function(s){ document.getElementById(s).style.display = 'none'; });
+    document.getElementById(id).style.display = 'block';
+  }
+
+  // ---------- create flow ----------
+
+  function pickCooler(c) {
+    // clear both then highlight whichever one got clicked
+    document.getElementById('coolerACreate').classList.remove('selected');
+    document.getElementById('coolerBCreate').classList.remove('selected');
+    document.getElementById('cooler' + c + 'Create').classList.add('selected');
+    draft.cooler = c;
+  }
+
+  // builds the checklist of drinks + checkboxes and dumps it into the page
+  function renderProducts() {
+    let html = '';
+    for (let name in draft.products) {
+      let p = draft.products[name];
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #E9D9C8;font-size:13px;">';
+      html += '<span>' + name + '</span>';
+      html += '<span>A <input type="checkbox" ' + (p.A ? 'checked' : '') + ' onchange="toggleCooler(\'' + name + '\',\'A\',this.checked)"> ';
+      html += 'B <input type="checkbox" ' + (p.B ? 'checked' : '') + ' onchange="toggleCooler(\'' + name + '\',\'B\',this.checked)"></span>';
+      html += '</div>';
+    }
+    document.getElementById('productList').innerHTML = html;
+  }
+
+  function toggleCooler(name, cooler, isChecked) { draft.products[name][cooler] = isChecked; }
+
+  // this is the big one - actually saves the whole session to firebase
+  async function finishCreate() {
+    let code = generateCode();
+    let workerId = Date.now().toString(36) + Math.random().toString(36).slice(2,6); // not fancy, just needs to be unique enough
+    let name = document.getElementById('yourNameCreate').value.trim() || 'Me';
+    let cooler = draft.cooler || 'A';
+
+    let session = {
+      eventName: document.getElementById('eventName').value.trim() || 'Untitled Event',
+      standName: document.getElementById('standName').value.trim() || '',
+      products: draft.products,
+      workers: {},    // gets filled in as people join
+      entries: {},    // every single tally, this is basically the whole audit trail
+      completion: {}  // tracks what's been marked done per product/phase/cooler
+    };
+    session.workers[workerId] = { name: name, cooler: cooler };
+
+    await fbPut('/sessions/' + code, session);
+
+    // remember who i am locally so the rest of the app knows
+    joinedCode = code;
+    joinedSession = session;
+    me = { workerId: workerId, name: name, cooler: cooler };
+
+    document.getElementById('createdEventName').innerText = session.eventName + (session.standName ? ' · ' + session.standName : '');
+    document.getElementById('createdCode').innerText = code;
+    showScreen('createdScreen');
+  }
+
+  // ---------- join flow ----------
+
+  async function findSession() {
+    let code = document.getElementById('joinCode').value.trim().toUpperCase();
+    let name = document.getElementById('yourNameJoin').value.trim();
+    if (!code || !name) { alert('enter both a code and your name'); return; }
+
+    let session = await fbGet('/sessions/' + code);
+    if (!session) { alert("that code doesn't match a session"); return; } // null means firebase has nothing there
+
+    joinedSession = session;
+    joinedCode = code;
+    document.getElementById('joinEventName').innerText = session.eventName;
+    document.getElementById('joinStandName').innerText = session.standName || '';
+    showScreen('coolerJoinScreen');
+  }
+
+  async function joinCooler(cooler) {
+    let workerId = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    let name = document.getElementById('yourNameJoin').value.trim();
+
+    await fbPut('/sessions/' + joinedCode + '/workers/' + workerId, { name: name, cooler: cooler });
+    // updating my local copy too so i don't have to wait on the next poll to see myself listed
+    joinedSession.workers = joinedSession.workers || {};
+    joinedSession.workers[workerId] = { name: name, cooler: cooler };
+    me = { workerId: workerId, name: name, cooler: cooler };
+
+    goDashboard();
+  }
+
+  // ---------- dashboard ----------
+
+  // only returns products that are actually in MY cooler, so i don't see stuff
+  // thats only in the other one
+  function productsForCooler() {
+    let list = [];
+    for (let name in joinedSession.products) {
+      let p = joinedSession.products[name];
+      if ((me.cooler === 'A' && p.A) || (me.cooler === 'B' && p.B)) list.push(name);
+    }
+    return list;
+  }
+
+  // grabs every entry matching a product + phase, optionally just one cooler
+  function entriesFor(product, ph, cooler) {
+    let out = [];
+    let entries = joinedSession.entries || {};
+    for (let key in entries) {
+      let e = entries[key];
+      if (e.product === product && e.phase === ph && (!cooler || e.cooler === cooler)) {
+        e._key = key; // need the firebase key saved so undo knows what to delete later
+        out.push(e);
+      }
+    }
+    return out.sort(function(a,b){ return a.ts - b.ts; });
+  }
+
+  function coolerTotal(product, ph, cooler) {
+    return entriesFor(product, ph, cooler).reduce(function(sum,e){ return sum + e.amount; }, 0);
+  }
+
+  function productCoolers(product) {
+    let p = joinedSession.products[product], list = [];
+    if (p.A) list.push('A'); if (p.B) list.push('B');
+    return list;
+  }
+
+  // this is the whole point of the app basically - adds both coolers together
+  // so nobody has to do 71 + 87 in their head
+  function sharedTotal(product, ph) {
+    return productCoolers(product).reduce(function(s,c){ return s + coolerTotal(product, ph, c); }, 0);
+  }
+
+  function isDone(product, ph, cooler) {
+    let c = joinedSession.completion;
+    return !!(c && c[ph] && c[ph][product] && c[ph][product][cooler]);
+  }
+
+  function goDashboard() {
+    showScreen('dashboardScreen');
+    document.getElementById('dashEventName').innerText = joinedSession.eventName;
+    document.getElementById('dashSub').innerText = (joinedSession.standName ? joinedSession.standName + ' · ' : '') + me.name + ' · Cooler ' + me.cooler;
+    renderDashboard();
+    startPolling();
+  }
+
+  function setPhase(p) { phase = p; renderDashboard(); }
+
+  function renderDashboard() {
+    document.getElementById('phaseInTab').classList.toggle('active', phase === 'in');
+    document.getElementById('phaseOutTab').classList.toggle('active', phase === 'out');
+
+    let list = productsForCooler();
+    let html = '';
+    list.forEach(function(name) {
+      let sub = coolerTotal(name, phase, me.cooler);
+      let done = isDone(name, phase, me.cooler);
+      html += '<div class="prod-row" onclick="openProduct(\'' + name + '\')">';
+      html += '<span>' + name + '</span>';
+      html += '<span class="prod-status' + (done ? ' done' : '') + '">' + (done ? '✓ ' + sub : (sub > 0 ? sub : 'not counted')) + '</span>';
+      html += '</div>';
+    });
+    document.getElementById('dashList').innerHTML = html;
+  }
+
+  // checks firebase every 4 seconds so everyone's screen eventually catches up
+  // to everyone else's taps. not true realtime but good enough for this
+  function startPolling() {
+    if (pollHandle) clearInterval(pollHandle); // stop the old one so they dont pile up
+    pollHandle = setInterval(async function() {
+      let fresh = await fbGet('/sessions/' + joinedCode);
+      if (fresh) {
+        joinedSession = fresh;
+        // only bother re-rendering whichever screen is actually on screen right now
+        if (document.getElementById('dashboardScreen').style.display === 'block') renderDashboard();
+        if (document.getElementById('countingScreen').style.display === 'block') renderCounting();
+      }
+    }, 4000);
+  }
+
+  // ---------- counting screen ----------
+
+  function openProduct(name) {
+    currentProduct = name;
+    currentIncrement = null; // reset so it always starts back on the picker grid
+    showScreen('countingScreen');
+    renderCounting();
+  }
+
+  function renderCounting() {
+    document.getElementById('countProdName').innerText = currentProduct;
+    document.getElementById('countPhaseLabel').innerText = (phase === 'in' ? 'Count In' : 'Count Out') + ' · Cooler ' + me.cooler;
+    document.getElementById('countNum').innerText = coolerTotal(currentProduct, phase, me.cooler);
+
+    let controlsEl = document.getElementById('countControls');
+    if (!currentIncrement) {
+      // haven't picked a number yet, show the grid of chips
+      let html = '<div class="chip-grid">';
+      [1,6,10,12,20,24].forEach(function(n){ html += '<div class="qty-chip" onclick="pickIncrement(' + n + ')">+' + n + '</div>'; });
+      html += '<div class="qty-chip" onclick="pickIncrement(\'custom\')">Custom</div></div>';
+      controlsEl.innerHTML = html;
+    } else {
+      // already picked one, show the big repeat button instead
+      let mine = entriesFor(currentProduct, phase, me.cooler).filter(function(e){ return e.workerId === me.workerId; });
+      // only count entries that match my increment exactly - remainders don't count as a "group"
+      let groups = mine.filter(function(e){ return !e.isRemainder && e.amount === currentIncrement; }).length;
+      let html = '<button class="big-repeat" onclick="tapRepeat()">+' + currentIncrement + '</button>';
+      html += '<div class="groups-label">' + groups + ' group' + (groups===1?'':'s') + ' of ' + currentIncrement + '</div>';
+      html += '<button onclick="undoLast()">Undo</button>';
+      html += '<label>Remainder</label><div style="display:flex;gap:6px;"><input type="number" id="remainderInput" style="flex:1;"><button style="width:auto;padding:10px 14px;" onclick="addRemainder()">Add</button></div>';
+      controlsEl.innerHTML = html;
+    }
+
+    let coolers = productCoolers(currentProduct);
+    let totalsHtml = coolers.map(function(c){
+      return '<div><div class="tot-label">COOLER ' + c + '</div><div class="tot-val">' + coolerTotal(currentProduct, phase, c) + '</div></div>';
+    }).join('');
+    totalsHtml += '<div><div class="tot-label">SHARED</div><div class="tot-val shared">' + sharedTotal(currentProduct, phase) + '</div></div>';
+    document.getElementById('countTotals').innerHTML = totalsHtml;
+
+    let done = isDone(currentProduct, phase, me.cooler);
+    document.getElementById('doneBtn').innerText = done ? '✓ Done with ' + currentProduct : 'Mark done with ' + currentProduct;
+  }
+
+  async function pickIncrement(n) {
+    if (n === 'custom') {
+      n = parseInt(prompt('Count in groups of how many?'), 10);
+      if (!n || n <= 0) return; // they cancelled or typed junk, just bail
+    }
+    currentIncrement = n;
+    await addEntry(n, false); // first tap counts as your first group too
+  }
+
+  async function tapRepeat() { await addEntry(currentIncrement, false); }
+
+  async function addRemainder() {
+    let n = parseInt(document.getElementById('remainderInput').value, 10);
+    if (!n) return;
+    await addEntry(n, true); // marking it as a remainder so it doesnt mess up the "groups of x" count
+  }
+
+  // adds one tally. updates the screen right away so it feels instant,
+  // then actually saves it after (so a slow connection doesn't make the app feel laggy)
+  async function addEntry(amount, isRemainder) {
+    let entryId = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    let entry = {
+      workerId: me.workerId, workerName: me.name, cooler: me.cooler,
+      product: currentProduct, phase: phase, amount: amount, ts: Date.now(), isRemainder: !!isRemainder
+    };
+    joinedSession.entries = joinedSession.entries || {};
+    joinedSession.entries[entryId] = entry;
+    renderCounting();
+    await fbPut('/sessions/' + joinedCode + '/entries/' + entryId, entry);
+  }
+
+  // only ever deletes MY most recent entry, never touches anyone elses tallies
+  async function undoLast() {
+    let mine = entriesFor(currentProduct, phase, me.cooler).filter(function(e){ return e.workerId === me.workerId; });
+    if (!mine.length) return;
+    let last = mine[mine.length - 1]; // already sorted oldest to newest so last = most recent
+    delete joinedSession.entries[last._key];
+    renderCounting();
+    await fbDelete('/sessions/' + joinedCode + '/entries/' + last._key);
+  }
+
+  // only marks MY cooler as done, doesnt touch the other cooler's status
+  async function toggleDone() {
+    let nowDone = !isDone(currentProduct, phase, me.cooler);
+    joinedSession.completion = joinedSession.completion || {};
+    joinedSession.completion[phase] = joinedSession.completion[phase] || {};
+    joinedSession.completion[phase][currentProduct] = joinedSession.completion[phase][currentProduct] || {};
+    joinedSession.completion[phase][currentProduct][me.cooler] = nowDone;
+    renderCounting();
+    await fbPut('/sessions/' + joinedCode + '/completion/' + phase + '/' + currentProduct + '/' + me.cooler, nowDone);
+  }
+
+  // ---------- summary screen ----------
+
+  function renderSummary() {
+    document.getElementById('sumEventName').innerText = joinedSession.eventName;
+
+    function table(ph, label) {
+      let rows = '';
+      for (let name in joinedSession.products) {
+        let p = joinedSession.products[name];
+        let a = p.A ? coolerTotal(name, ph, 'A') : '—'; // dash if that product isnt even in this cooler
+        let b = p.B ? coolerTotal(name, ph, 'B') : '—';
+        rows += '<tr><td>' + name + '</td><td>' + a + '</td><td>' + b + '</td><td>' + sharedTotal(name, ph) + '</td></tr>';
+      }
+      return '<p style="font-weight:700;color:#861F41;margin:14px 0 4px;">' + label + '</p><table class="sum-table"><tr><th>Product</th><th>A</th><th>B</th><th>Total</th></tr>' + rows + '</table>';
+    }
+
+    document.getElementById('sumTables').innerHTML = table('in', 'COUNT IN') + table('out', 'COUNT OUT');
+  }
+</script>
+
+</body>
+</html>
