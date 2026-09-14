@@ -26,7 +26,7 @@ TallyUp fixes that: two coworkers join the same session on their own phones, eac
 - Mark a product "done" per cooler once you've finished counting it
 
 ## Demo Link 
-https://canva.link/a76ig5kvd1si86u 
+[https://canva.link/a76ig5kvd1si86u ](https://canva.link/a76ig5kvd1si86u)
 
 ## Try it yourself 
 https://sundarikanag.github.io/tallyup/
