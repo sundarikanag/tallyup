@@ -12,9 +12,8 @@ I worked this job at a concession stand, where before and after every game we co
 
 TallyUp fixes that: two coworkers join the same session on their own phones, each picks a cooler, taps through their count in whatever groupings they like, and the app combines both coolers' totals live — no one adds anything up by hand.
 
-━━━━⊱⋆⊰━━━━━━━━⊱⋆⊰━━━━
-**Features**
-━━━━⊱⋆⊰━━━━━━━━⊱⋆⊰━━━━
+
+## Features
 
 - Create a count with an event name, stand name, and a per-cooler product checklist (a drink can exist in Cooler A only, Cooler B only, or both)
 - Join a running count with a 6-character code, then pick which cooler you're counting
