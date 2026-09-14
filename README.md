@@ -2,6 +2,7 @@
 
 <img width="763" height="423" alt="Screenshot 2026-09-14 at 6 40 51 AM" src="https://github.com/user-attachments/assets/bf2d125b-7a2c-4d1f-a888-70729ef071a4" />
 
+━━━━⊱⋆⊰━━━━
 
 A collaborative counting app I built for my concession stand job — solving the actual problem of two workers counting the same drinks in two different coolers, then having to hand-combine paper tallies afterward.
 
@@ -23,6 +24,9 @@ TallyUp fixes that: two coworkers join the same session on their own phones, eac
 
 ## Demo Link 
 https://canva.link/a76ig5kvd1si86u 
+
+## Try it yourself 
+https://sundarikanag.github.io/tallyup/
 
 
 
