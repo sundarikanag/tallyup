@@ -32,12 +32,12 @@ TallyUp fixes that: two coworkers join the same session on their own phones, eac
 https://sundarikanag.github.io/tallyup/
 
 
-
-## Built With
-
-- HTML / CSS / JavaScript (no framework, no build step)
-- Firebase Realtime Database (accessed via plain `fetch()` calls, not the Firebase SDK)
-- GitHub Pages for hosting
+## Tech Stack
+- HTML
+- CSS
+- JavaScript
+- Firebase Realtime Database
+- GitHub Pages
 
 ## What I Learned
 
