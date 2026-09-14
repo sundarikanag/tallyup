@@ -1,5 +1,8 @@
 ## TallyUp
 
+<img width="763" height="423" alt="Screenshot 2026-09-14 at 6 40 51 AM" src="https://github.com/user-attachments/assets/bf2d125b-7a2c-4d1f-a888-70729ef071a4" />
+
+
 A collaborative counting app I built for my concession stand job — solving the actual problem of two workers counting the same drinks in two different coolers, then having to hand-combine paper tallies afterward.
 
 I worked this job at a concession stand, where before and after every game we count hundreds of beverages across two coolers in less than 40 minutes. Two people usually count in parallel, in different-sized groups (10s, 20s, 40s), then have to manually add up their subtotals — easy to lose track of who counted what, and easy to make an arithmetic mistake combining numbers under time pressure.
@@ -17,6 +20,11 @@ TallyUp fixes that: two coworkers join the same session on their own phones, eac
 - Separate Count In / Count Out phases, so pre-event and post-event counts stay independent
 - A summary screen showing both phases across both coolers at a glance
 - Mark a product "done" per cooler once you've finished counting it
+
+## Demo Link 
+https://canva.link/a76ig5kvd1si86u 
+
+
 
 ## Built With
 
