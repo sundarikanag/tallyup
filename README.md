@@ -4,7 +4,7 @@
 
 
 
-━━━━⊱⋆⊰━━━━━━━━⊱⋆⊰━━━━━━━━⊱⋆⊰━━━━━━━━⊱⋆⊰━━━━━━━━⊱⋆⊰━━━━━━━━⊱⋆⊰━━━━━━━━
+━━━━⊱⋆⊰━━━━━━━━⊱⋆⊰━━━━
 
 A collaborative counting app I built for my concession stand job — solving the actual problem of two workers counting the same drinks in two different coolers, then having to hand-combine paper tallies afterward.
 
